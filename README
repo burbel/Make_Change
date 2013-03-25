@@ -1,0 +1,5 @@
+MakeChange
+==========
+Given a set of coin denominations, and an amount, find the minimum number of coins needed to make that amount of change
+
+If change cannot be given with any combination of denominations, return -1
