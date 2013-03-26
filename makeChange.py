@@ -1,40 +1,220 @@
-Skype chat transcript with Bill [2011/7/29]:
+#! /usr/bin/env python
+
+def create_list_of_testcases(filename):
+# testcaseinput file has on the first line the number of testcases to run
+# after the first line every 2 lines has a testcase - the first line is the set of denomiations
+# the second line is the amount to make change for followed by the answer you should generate
+
+    testcaselist = []
+   
+    with open(filename, 'r') as f:
+        testcaseinput = f.readlines()
+
+    for count in xrange(len(testcaseinput)):
+        testcaseinput[count] = testcaseinput[count].replace('\n','')
+
+    testcaselist.append(int(testcaseinput[0]))
+
+    for count in xrange(1, len(testcaseinput)):
+        if (count % 2) == 1:
+            testcaselist.append(list(set(map(int, testcaseinput[count].split(' ')))))
+        else:
+            testcaselist.append(map(int, testcaseinput[count].split(' ')))
+
+    return testcaselist
+
+def run_tests(test_cases):
+# runs through test_cases[0] tests, performing the calculation for each test and printing the results
+# results are timed and number of failures are tracked and reported at the end as well as intermediate
+
+    import time
+
+    total_start = time.clock()
+    count_fail = 0
+    print
+
+    for count in xrange(1,test_cases[0] +1):
+        start_time = time.clock()
+        pass
+# This is where I process things
+        actual = 1
+# And done
+        pass
+        end_time = time.clock()
+        if (actual == test_cases[count*2][0]):
+            pass
+            print "pass: test case #%2d  found %8d in %8d ms" % (count, test_cases[count*2][0], (end_time - start_time))
+        else:
+            pass
+            print "FAIL: test case #%2d !found %8d in %8d ms (it found %8d)" % (count, test_cases[count*2][0], (end_time - start_time), actual)
+            count_fail += 1
+        pass
+
+    total_end = time.clock()
+    print
+    print "Processed %d test cases in %d ms" % (test_cases[0], (total_end - total_start))
+    if (count_fail > 0):
+        print " * but there were %d failures *" % count_fail
+
+def main():    # Don't leave the code in the global namespace, it runs slower
+
+    import sys
+
+    if len(sys.argv) != 2:
+        print "ERROR: please run makeChange.py with the inputfilename parameter"
+        print "Example: python makeChange.py sample.in"
+        exit(1)
+
+    run_tests(create_list_of_testcases(sys.argv[1]))
+
+main()
+
+"""
+<html>
+<head>
+<script type="text/javascript">
+
+function pop(array) {
+  if (array.length > 0) {
+    var last = array[array.length - 1];
+    array.splice(array.length-1, 1);
+    return last;
+  }
+  return -1;
+}
+
+function makeChange(denominations, amount)
+{
+  if (amount < 0) {
+    return -1;
+  }
+  for (var i = 0; i < denominations.length; i++) {
+    if (denominations[i] <= 0) {
+      return -1;
+    }
+  }
+
+  var min = new Object();
+  min[0] = 0;
+  for (var i = 1; i <= amount; i++) {
+    min[i] = Number.MAX_VALUE;
+    for (var j = 0; j < denominations.length; j++) {
+      var d = denominations[j];
+      if(d <= i && min[i - d] != Number.MAX_VALUE) {
+        var c = 1 + min[i - d];
+        if (c < min[i]) {
+          min[i] = c;
+        }
+      }
+    }
+  }
+  var retval = min[amount];
+  if (retval == Number.MAX_VALUE) {
+    retval = -1;
+  }
+  return retval;
+}
 
 /*
-     function makeChange(denominations, amount)
-     {
-      if (amount < 0) {
-        return -1;
-      }
-      for (var i = 0; i < denominations.length; i++) {
-        if (denominations[i] <= 0) {
-          return -1;
-        }
-      }
-     
-      denominations = denominations.slice(); // copy the array so we don't modify the original
-      denominations.sort(function(a,b){return b - a}); // javascript sucks...
-     
-      if (amount == 0) {
-        return 0;
-      } else {
-        var min = Number.MAX_VALUE;
-        for (var i = 0; i < denominations.length; i++) {
-          var d = denominations[i];
-          if (d <= amount) {
-            var c = 1 + makeChange(denominations, amount - d);
-            if (c != 0 && c < min) {
-              min = c;
-            }
-          }
-        }
-        if (min == Number.MAX_VALUE) {
-          min = -1;
-        }
-        return min;
-      }
-     }
-     
+function makeChange(denominations, amount)
+{
+  denominations = denominations.slice(); // copy the array so we don't modify the original
+  denominations.sort(function(a,b){return b - a}); // javascript sucks...
+
+  var cache = new Object();
+  return _makeChange(denominations, amount, cache);
+}
+
+function _makeChange(denominations, amount, cache)
+{
+  //alert("makeChange: [" + denominations + "], " + amount + ", cacheAmount = " + cache[amount]);
+
+  if (amount == 0) {
+    return 0;
+  } else if (cache[amount] != undefined) {
+    return cache[amount];
+  } else {
+    var min = Number.MAX_VALUE;
+    for (var i = 0; i < denominations.length; i++) {
+      var d = denominations[i];
+      if (d <= amount) {
+        var c = 1 + _makeChange(denominations, amount - d, cache);
+        if (c != 0 && c < min) {
+          min = c;
+        }
+      }
+    }
+    if (min == Number.MAX_VALUE) {
+      min = -1;
+    }
+    cache[amount] = min;
+    return min;
+  }
+}
+*/
+
+function test(denominations, amount, expected) {
+  try {
+    var startTime = new Date();
+    var actual = makeChange(denominations, amount);
+    var endTime = new Date();
+    var totalTime = endTime.getTime() - startTime.getTime();
+    if (actual == expected) {
+      document.getElementById("results").innerHTML += "PASS: [" + denominations + "], " + amount + " = " + expected + " in " + totalTime + "ms<br>";
+    } else {
+      document.getElementById("results").innerHTML += "FAIL: [" + denominations + "], " + amount + " = " + expected + " (returned " + actual + ")<br>";
+    }
+  } catch (ex) {
+    document.getElementById("results").innerHTML += "FAIL: [" + denominations + "], " + amount + " = " + expected + " (threw exception: " + ex + ")<br>";
+  }
+}
+
+function runTests() {
+/*
+  test([1, 5, 10, 25], 75, 3);
+  test([10, 25, 1, 5], 75, 3);
+  test([1, 41, 42], 82, 2);
+  test([1, 5, 10, 25, 50, 100, 100, 500, 1000, 2000, 5000, 10000, 100000], 123456, 12);
+  test([1, 5, 10, 25], 75, 3);
+  test([10, 25, 1, 5], 75, 3);
+  test([4,5], 7, -1);
+  test([1,4,5], 8, 2);
+  test([], 20, -1);
+  test([25], 1, -1);
+  test([1, 2, 5], 4, 2);
+  test([1, 2, 3, 3], 20, 7);
+  test([1, 41, 42], 82, 2);
+  test([1, 41, 42, 600, 700], 82, 2);
+  test([1, 41, 42, 65, 70], 82, 2);
+  test([-1, -2, -3], 5, -1);
+  test([-1, -2, -3], -5, -1);
+  test([1,2,3,4,5], -5, -1);
+  test([1, 41, 42], 172200, 4100);
+  */
+  /*
+  test([1, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163,167, 173], 123456, 714);
+  test([2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521, 523, 541, 547, 557, 563, 569, 571, 577, 587, 593, 599, 601, 607, 613, 617, 619, 631, 641, 643, 647, 653, 659, 661, 673, 677, 683, 691, 701, 709, 719, 727, 733, 739, 743, 751, 757, 761, 769, 773, 787, 797, 809, 811, 821, 823, 827, 829, 839, 853, 857, 859, 863, 877, 881, 883, 887, 907, 911, 919, 929, 937, 941, 947, 953, 967, 971, 977, 983, 991, 997], 123456, 124);
+  test([2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,113,127,131,137,139,149,151,157,163,167,173,179,181,191,193,197,199,211,223,227,229,233,239,241,251,257,263,269,271,277,281,283,293,307,311,313,317,331,337,347,349,353,359,367,373,379,383,389,397,401,409,419,421,431,433,439,443,449,457,461,463,467,479,487,491,499,503,509,521,523,541,547,557,563,569,571,577,587,593,599,601,607,613,617,619,631,641,643,647,653,659,661,673,677,683,691,701,709,719,727,733,739,743,751,757,761,769,773,787,797,809,811,821,823,827,829,839,853,857,859,863,877,881,883,887,907,911,919,929,937,941,947,953,967,971,977,983,991,997,1009,1013,1019,1021,1031,1033,1039,1049,1051,1061,1063,1069,1087,1091,1093,1097,1103,1109,1117,1123,1129,1151,1153,1163,1171,1181,1187,1193,1201,1213,1217,1223,1229,1231,1237,1249,1259,1277,1279,1283,1289,1291,1297,1301,1303,1307,1319,1321,1327,1361,1367,1373,1381,1399,1409,1423,1427,1429,1433,1439,1447,1451,1453,1459,1471,1481,1483,1487,1489,1493,1499,1511,1523,1531,1543,1549,1553,1559,1567,1571,1579,1583,1597,1601,1607,1609,1613,1619,1621,1627,1637,1657,1663,1667,1669,1693,1697,1699,1709,1721,1723,1733,1741,1747,1753,1759,1777,1783,1787,1789,1801,1811,1823,1831,1847,1861,1867,1871,1873,1877,1879,1889,1901,1907,1913,1931,1933,1949,1951,1973,1979,1987,1993,1997,1999,2003,2011,2017,2027,2029,2039,2053,2063,2069,2081,2083,2087,2089,2099,2111,2113,2129,2131,2137,2141,2143,2153,2161,2179,2203,2207,2213,2221,2237,2239,2243,2251,2267,2269,2273,2281,2287,2293,2297,2309,2311,2333,2339,2341,2347,2351,2357,2371,2377,2381,2383,2389,2393,2399,2411,2417,2423,2437,2441,2447,2459,2467,2473,2477,2503,2521,2531,2539,2543,2549,2551,2557,2579,2591,2593,2609,2617,2621,2633,2647,2657,2659,2663,2671,2677,2683,2687,2689,2693,2699,2707,2711,2713,2719,2729,2731,2741,2749,2753,2767,2777,2789,2791,2797,2801,2803,2819,2833,2837,2843,2851,2857,2861,2879,2887,2897,2903,2909,2917,2927,2939,2953,2957,2963,2969,2971,2999,3001,3011,3019,3023,3037,3041,3049,3061,3067,3079,3083,3089,3109,3119,3121,3137,3163,3167,3169,3181,3187,3191,3203,3209,3217,3221,3229,3251,3253,3257,3259,3271,3299,3301,3307,3313,3319,3323,3329,3331,3343,3347,3359,3361,3371,3373,3389,3391,3407,3413,3433,3449,3457,3461,3463,3467,3469,3491,3499,3511,3517,3527,3529,3533,3539,3541,3547,3557,3559,3571], 1234567, 347);
+  */
+    test([1, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163,167, 173], 123456, 714);
+
+    test([2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,113,127,131,137,139,149,151,157,163,167,173,179,181,191,193,197,199,211,223,227,229,233,239,241,251,257,263,269,271,277,281,283,293,307,311,313,317,331,337,347,349,353,359,367,373,379,383,389,397,401,409,419,421,431,433,439,443,449,457,461,463,467,479,487,491,499,503,509,521,523,541,547,557,563,569,571,577,587,593,599,601,607,613,617,619,631,641,643,647,653,659,661,673,677,683,691,701,709,719,727,733,739,743,751,757,761,769,773,787,797,809,811,821,823,827,829,839,853,857,859,863,877,881,883,887,907,911,919,929,937,941,947,953,967,971,977,983,991,997], 123456, 124); // Bill's old version 832ms, new version 247ms
+
+    test([2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,113,127,131,137,139,149,151,157,163,167,173,179,181,191,193,197,199,211,223,227,229,233,239,241,251,257,263,269,271,277,281,283,293,307,311,313,317,331,337,347,349,353,359,367,373,379,383,389,397,401,409,419,421,431,433,439,443,449,457,461,463,467,479,487,491,499,503,509,521,523,541,547,557,563,569,571,577,587,593,599,601,607,613,617,619,631,641,643,647,653,659,661,673,677,683,691,701,709,719,727,733,739,743,751,757,761,769,773,787,797,809,811,821,823,827,829,839,853,857,859,863,877,881,883,887,907,911,919,929,937,941,947,953,967,971,977,983,991,997,1009,1013,1019,1021,1031,1033,1039,1049,1051,1061,1063,1069,1087,1091,1093,1097,1103,1109,1117,1123,1129,1151,1153,1163,1171,1181,1187,1193,1201,1213,1217,1223,1229,1231,1237,1249,1259,1277,1279,1283,1289,1291,1297,1301,1303,1307,1319,1321,1327,1361,1367,1373,1381,1399,1409,1423,1427,1429,1433,1439,1447,1451,1453,1459,1471,1481,1483,1487,1489,1493,1499,1511,1523,1531,1543,1549,1553,1559,1567,1571,1579,1583,1597,1601,1607,1609,1613,1619,1621,1627,1637,1657,1663,1667,1669,1693,1697,1699,1709,1721,1723,1733,1741,1747,1753,1759,1777,1783,1787,1789,1801,1811,1823,1831,1847,1861,1867,1871,1873,1877,1879,1889,1901,1907,1913,1931,1933,1949,1951,1973,1979,1987,1993,1997,1999,2003,2011,2017,2027,2029,2039,2053,2063,2069,2081,2083,2087,2089,2099,2111,2113,2129,2131,2137,2141,2143,2153,2161,2179,2203,2207,2213,2221,2237,2239,2243,2251,2267,2269,2273,2281,2287,2293,2297,2309,2311,2333,2339,2341,2347,2351,2357,2371,2377,2381,2383,2389,2393,2399,2411,2417,2423,2437,2441,2447,2459,2467,2473,2477,2503,2521,2531,2539,2543,2549,2551,2557,2579,2591,2593,2609,2617,2621,2633,2647,2657,2659,2663,2671,2677,2683,2687,2689,2693,2699,2707,2711,2713,2719,2729,2731,2741,2749,2753,2767,2777,2789,2791,2797,2801,2803,2819,2833,2837,2843,2851,2857,2861,2879,2887,2897,2903,2909,2917,2927,2939,2953,2957,2963,2969,2971,2999,3001,3011,3019,3023,3037,3041,3049,3061,3067,3079,3083,3089,3109,3119,3121,3137,3163,3167,3169,3181,3187,3191,3203,3209,3217,3221,3229,3251,3253,3257,3259,3271,3299,3301,3307,3313,3319,3323,3329,3331,3343,3347,3359,3361,3371,3373,3389,3391,3407,3413,3433,3449,3457,3461,3463,3467,3469,3491,3499,3511,3517,3527,3529,3533,3539,3541,3547,3557,3559,3571], 123456, 36); // 772ms for Bill - beat a second on that, and i'll buy ya dinner, if ya didn't cheat
+}
+
+</script>
+</head>
+<body onload="runTests()">
+  <div id="results">Results:<br></div>
+</body>
+</html>
+"""
+
+
+"""
+
+Skype chat transcript with Bill [2011/7/29]:
      [7/29/11 1:14:30 AM] Brian Bibeault: I was thinking you said that in Java there was an O(N) difference or something.
      [7/29/11 1:14:30 AM] Brian Bibeault: Ok
      [7/29/11 1:14:33 AM] Brian Bibeault: WTF that's it?
@@ -194,3 +374,4 @@ Skype chat transcript with Bill [2011/7/29]:
      
      ADD A HASH TABLE.  NEED TO DO UPDATES AND WHATNOT, but if I do that, it might fail completely to increase performance.
      */
+"""
