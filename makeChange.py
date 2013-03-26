@@ -12,7 +12,7 @@ def create_list_of_testcases(filename):
     testcaselist.append(int(testcaseinput[0]))
     for count in xrange(1, len(testcaseinput)):
         if (count % 2) == 1:
-            testcaselist.append(list(set(map(int, testcaseinput[count].split(' ')))))
+            testcaselist.append(sorted(list(set(map(int, testcaseinput[count].split(' '))))))
         else:
             testcaselist.append(map(int, testcaseinput[count].split(' ')))
     return testcaselist
@@ -26,7 +26,12 @@ def run_tests(test_cases):
     print
     for count in xrange(1,test_cases[0] +1):
         start_time = time.clock()
-        actual = makeChange(test_cases[(count * 2) - 1], test_cases[(count * 2)][0])
+        if test_cases[(count * 2)][0] < 0: # Invalid case, cannot have negative amounts
+            actual =  -1
+        elif test_cases[(count * 2) - 1][0] < 0: # Invalid case, cannot have negative denominations
+           actual =  -1
+        else:
+            actual = makeChange(test_cases[(count * 2) - 1], test_cases[(count * 2)][0])
         end_time = time.clock()
         if (actual == test_cases[count*2][1]):
             print "pass: test case #%2d  found %8d in %.3f ms" % (count, test_cases[count*2][1], (end_time - start_time)*1000)
@@ -41,36 +46,19 @@ def run_tests(test_cases):
         print " * but there were %d failures *" % count_fail
 
 def makeChange(denominations, amount):
-
     import sys
 
-    if amount < 0:
-        return -1
-
-    denominations = sorted(denominations)
-
-    if denominations[0] < 0:
-        return -1
-
     dictionary = {}
-
     dictionary[0] = 0
+    for count in xrange(-1*denominations[-1], 0):
+        dictionary[count] = sys.maxint
 
-    for count in xrange(1, amount+1):
+    for count in xrange(1, amount + 1):
         dictionary[count] = sys.maxint    
-
-    for denom in denominations:
-        dictionary[denom] = 1
-
-    for count in xrange(1, amount+1):
         for denom in denominations:
-            #print "denomination %r" % denomination
-            #print "dictionary[denomination] %r" % dictionary[denomination]
-            #d = dictionary[denomination]
-            if ((denom <= count) and (dictionary[count - denom] != sys.maxint)):
-                c = 1 + dictionary[count - denom]
-                if (c < dictionary[count]):
-                    dictionary[count] = c
+            try_denom = 1 + dictionary[count - denom]
+            if (try_denom < dictionary[count]):
+                dictionary[count] = try_denom
 
     if (dictionary[amount] != sys.maxint):
         return dictionary[amount]
